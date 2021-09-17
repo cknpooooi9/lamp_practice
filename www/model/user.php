@@ -29,7 +29,7 @@ function get_user_by_name($db, $name){
     FROM
       users
     WHERE
-      name = ':name'
+      name = :name
     LIMIT 1
   ";
 
@@ -104,9 +104,9 @@ function insert_user($db, $name, $password){
   $sql = "
     INSERT INTO
       users(name, password)
-    VALUES ('{$name}', '{$password}');
+    VALUES (':name', ':password');
   ";
 
-  return execute_query($db, $sql);
+  return execute_query($db, $sql, array("':name'" => $name, "':password'" => $password));
 }
 
