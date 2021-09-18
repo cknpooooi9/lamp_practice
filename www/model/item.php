@@ -1,9 +1,12 @@
 <?php
+//汎用の関数ファイルを読み込む
 require_once MODEL_PATH . 'functions.php';
+//db接続用のファイルを読み込む
 require_once MODEL_PATH . 'db.php';
 
 // DB利用
 
+//アイテム情報の取得
 function get_item($db, $item_id){
   $sql = "
     SELECT
@@ -16,12 +19,14 @@ function get_item($db, $item_id){
     FROM
       items
     WHERE
-      item_id = {$item_id}
+      item_id = :item_id
   ";
 
-  return fetch_query($db, $sql);
+  //DBの中から一つ取得
+  return fetch_query($db, $sql, array(':item_id' => $item_id));
 }
 
+//アイテム情報の取得
 function get_items($db, $is_open = false){
   $sql = '
     SELECT
@@ -34,43 +39,56 @@ function get_items($db, $is_open = false){
     FROM
       items
   ';
+  //trueの場合
   if($is_open === true){
     $sql .= '
       WHERE status = 1
     ';
   }
 
+  //DBからすべて取得
   return fetch_all_query($db, $sql);
 }
 
+//アイテム情報すべて取得
 function get_all_items($db){
   return get_items($db);
 }
 
+//チェックした時、tureだった商品のみ取得
 function get_open_items($db){
   return get_items($db, true);
 }
 
+//商品の新規登録
 function regist_item($db, $name, $price, $stock, $status, $image){
+  //新しくアップロードされたファイルの名前
   $filename = get_upload_filename($image);
+  //バリデーション
   if(validate_item($name, $price, $stock, $filename, $status) === false){
     return false;
   }
   return regist_item_transaction($db, $name, $price, $stock, $status, $image, $filename);
 }
 
+//トランザクション
 function regist_item_transaction($db, $name, $price, $stock, $status, $image, $filename){
+  //トランザクション開始
   $db->beginTransaction();
+  //商品追加且つ商品画像を保存
   if(insert_item($db, $name, $price, $stock, $filename, $status) 
     && save_image($image, $filename)){
+    //コミット処理
     $db->commit();
     return true;
   }
+  //ロールバック処理
   $db->rollback();
   return false;
   
 }
 
+//商品追加
 function insert_item($db, $name, $price, $stock, $filename, $status){
   $status_value = PERMITTED_ITEM_STATUSES[$status];
   $sql = "
@@ -82,65 +100,76 @@ function insert_item($db, $name, $price, $stock, $filename, $status){
         image,
         status
       )
-    VALUES('{$name}', {$price}, {$stock}, '{$filename}', {$status_value});
+    VALUES(:name, :price, :stock, :filename, :status_value);
   ";
 
-  return execute_query($db, $sql);
+  return execute_query($db, $sql, array(':name' => $name, ':price' => $price, ':stock' => $stock, ':filename' => $filename, ':status_value' => $status_value));
 }
 
+//商品の公開状態を更新
 function update_item_status($db, $item_id, $status){
   $sql = "
     UPDATE
       items
     SET
-      status = {$status}
+      status = :status
     WHERE
-      item_id = {$item_id}
+      item_id = :item_id
     LIMIT 1
   ";
   
-  return execute_query($db, $sql);
+  //SQL文を実行
+  return execute_query($db, $sql, array(':status' => $status, ':item_id' => $item_id));
 }
 
+//商品在庫を更新
 function update_item_stock($db, $item_id, $stock){
   $sql = "
     UPDATE
       items
     SET
-      stock = {$stock}
+      stock = :stock
     WHERE
-      item_id = {$item_id}
+      item_id = :item_id
     LIMIT 1
   ";
   
-  return execute_query($db, $sql);
+  //SQL文を実行
+  return execute_query($db, $sql, array(':stock' => $stock, ':item_id' => $item_id));
 }
 
+//商品情報削除
 function destroy_item($db, $item_id){
+  //商品情報を取得
   $item = get_item($db, $item_id);
   if($item === false){
     return false;
   }
+  //トランザクション開始
   $db->beginTransaction();
+  //商品と商品画像を削除
   if(delete_item($db, $item['item_id'])
     && delete_image($item['image'])){
+    //コミット処理
     $db->commit();
     return true;
   }
+  //ロールバック処理
   $db->rollback();
   return false;
 }
 
+//商品データを削除
 function delete_item($db, $item_id){
   $sql = "
     DELETE FROM
       items
     WHERE
-      item_id = {$item_id}
+      item_id = :item_id
     LIMIT 1
   ";
   
-  return execute_query($db, $sql);
+  return execute_query($db, $sql, array(':item_id' => $item_id));
 }
 
 

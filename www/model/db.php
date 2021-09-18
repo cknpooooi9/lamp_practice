@@ -16,33 +16,47 @@ function get_db_connect(){
   return $dbh;
 }
 
+//SQL文を実行するためのユーザ定義関数
 function fetch_query($db, $sql, $params = array()){
   try{
+    //プリペアドステートメント
     $statement = $db->prepare($sql);
+    //取得したparamsを実行
     $statement->execute($params);
+    //情報の一つを取得
     return $statement->fetch();
   }catch(PDOException $e){
+    //例外処理
     set_error('データ取得に失敗しました。');
   }
   return false;
 }
 
+//SQL文を実行するためのユーザ定義関数
 function fetch_all_query($db, $sql, $params = array()){
   try{
+    //プリペアドステートメント
     $statement = $db->prepare($sql);
+    //取得したparamsを実行
     $statement->execute($params);
+    //情報をすべて取得
     return $statement->fetchAll();
   }catch(PDOException $e){
+    //例外処理
     set_error('データ取得に失敗しました。');
   }
   return false;
 }
 
+//DB更新のSQL文を実行するためのユーザ定義関数
 function execute_query($db, $sql, $params = array()){
   try{
+    //プリペアドステートメント
     $statement = $db->prepare($sql);
+    //取得したparamsを実行
     return $statement->execute($params);
   }catch(PDOException $e){
+    //例外処理
     set_error('更新に失敗しました。');
   }
   return false;
