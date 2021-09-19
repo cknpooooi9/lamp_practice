@@ -13,6 +13,12 @@ require_once MODEL_PATH . 'cart.php';
 //セッション開始
 session_start();
 
+$token = get_post('token');
+if(is_valid_csrf_token($token) === false) {
+  redirect_to(LOGIN_URL);
+}
+unset($_SESSION['csrf_token']);
+
 //ログインチェック
 if(is_logined() === false){
   //ログインしてなければログインページにリダイレクト

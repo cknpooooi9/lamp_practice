@@ -38,5 +38,8 @@ if(purchase_carts($db, $carts) === false){
 //カート内合計金額
 $total_price = sum_carts($carts);
 
+//トークンの生成
+$token = get_csrf_token();
+
 //ビューを読み込む
 include_once '../view/finish_view.php';

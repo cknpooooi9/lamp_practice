@@ -9,6 +9,13 @@ require_once MODEL_PATH . 'user.php';
 //セッション開始
 session_start();
 
+//トークンの照合
+$token = get_post('token');
+if(is_valid_csrf_token($token) === false) {
+  redirect_to(LOGIN_URL);
+}
+unset($_SESSION['csrf_token']);
+
 //ログインチェックの関数
 if(is_logined() === true){
   //ログインしていればホームにリダイレクト
