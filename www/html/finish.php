@@ -13,6 +13,13 @@ require_once MODEL_PATH . 'cart.php';
 //セッション開始
 session_start();
 
+//トークンのチェック
+$token = get_post('token');
+if(is_valid_csrf_token($token) === false) {
+  redirect_to(LOGIN_URL);
+}
+unset($_SESSION['csrf_token']);
+
 //ログインチェック
 if(is_logined() === false){
   //ログインしてなければログインページにリダイレクト
@@ -37,6 +44,9 @@ if(purchase_carts($db, $carts) === false){
 
 //カート内合計金額
 $total_price = sum_carts($carts);
+
+//トークンの生成
+$token = get_csrf_token();
 
 //ビューを読み込む
 include_once '../view/finish_view.php';

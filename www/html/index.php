@@ -25,5 +25,8 @@ $user = get_login_user($db);
 //商品一覧のデータを取得
 $items = get_open_items($db);
 
+//トークンの生成
+$token = get_csrf_token();
+
 //ビューを読み込む
 include_once VIEW_PATH . 'index_view.php';
