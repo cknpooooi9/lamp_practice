@@ -45,6 +45,31 @@ if(purchase_carts($db, $carts) === false){
 //カート内合計金額
 $total_price = sum_carts($carts);
 
+//トランザクション開始
+$db->beginTransaction();
+
+//購入履歴テーブルの追加関数($user、戻り値は成功したらtrue、失敗したらfalse)
+if (insert_orders($db, $user['user_id']) === false) {
+  $db->rollback();
+  set_error('購入履歴の追加に失敗しました。');
+  //カートページへリダイレクト
+  redirect_to(CART_URL);
+}
+
+//lastInsertIdの取得を行う
+$order_id = $db->lastInsertId();
+
+//購入明細テーブルの追加関数($cartsとlastinsertidの値、戻り値は成功したらtrue、失敗したらfalse)
+if (insert_order_details($db, $order_id, $carts) === false) {
+  $db->rollback();
+  set_error('購入明細情報を追加できませんでした。');
+  //カートページへリダイレクト
+  redirect_to(CART_URL);
+}
+
+//どちらもtrueの場合、コミット処理
+$db->commit();
+
 //トークンの生成
 $token = get_csrf_token();
 

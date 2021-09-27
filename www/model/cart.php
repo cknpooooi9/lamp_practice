@@ -194,3 +194,38 @@ function validate_cart_purchase($carts){
   return true;
 }
 
+//購入履歴テーブルの追加
+function insert_orders($db, $user_id) {
+  $sql = "
+  INSERT INTO
+    orders(
+      user_id
+    )
+  VALUES(:user_id)
+";
+  return execute_query($db, $sql, array(':user_id' => $user_id));
+}
+
+//購入明細テーブルの追加
+function insert_order_details($db, $order_id, $carts) {
+  foreach ($carts as $cart) {
+    if (insert_order_detail($db, $order_id, $cart['item_id'], $cart['amount'], $cart['price']) === false){
+      return false;
+    }
+  }
+  return true;
+}
+
+function insert_order_detail($db, $order_id, $item_id, $amount, $price) {
+  $sql = "
+  INSERT INTO
+    order_details(
+      order_id,
+      item_id,
+      amount,
+      price
+    )
+  VALUES(:order_id, :item_id, :amount, :price)
+";
+  return execute_query($db, $sql, array(':order_id' => $order_id, 'item_id' => $item_id, 'amount' => $amount, ':price' => $price));
+}
