@@ -55,7 +55,7 @@ function get_all_items($db){
   return get_items($db);
 }
 
-//チェックした時、tureだった商品のみ取得
+//チェックした時、trueだった商品のみ取得
 function get_open_items($db){
   return get_items($db, true);
 }
@@ -234,4 +234,92 @@ function is_valid_item_status($status){
     $is_valid = false;
   }
   return $is_valid;
+}
+
+//ログインしている一般ユーザの購入履歴情報の取得（降順で表示）
+function get_user_orders($db, $user_id){
+  $sql = "
+    SELECT
+      orders.order_id,
+      orders.created,
+      SUM(order_details.amount * order_details.price) AS total
+    FROM
+      orders
+    JOIN
+      order_details
+    ON
+      orders.order_id = order_details.order_id
+    WHERE
+      user_id = :user_id
+    GROUP BY
+      order_id
+    ORDER BY
+      created desc
+  ";
+
+  return fetch_all_query($db, $sql, array(':user_id' => $user_id));
+}
+
+//1行だけ取得
+function get_user_order($db, $user_id) {
+  $sql = "
+    SELECT
+      orders.order_id,
+      orders.created,
+      SUM(order_details.amount * order_details.price) AS total
+    FROM
+      orders
+    JOIN
+      order_details
+    ON
+      orders.order_id = order_details.order_id
+    WHERE
+      user_id = :user_id
+    GROUP BY
+      order_id
+  ";
+
+  return fetch_query($db, $sql, array(':user_id' => $user_id));
+}
+
+function get_all_orders($db) {
+  $sql = "
+  SELECT
+    orders.order_id,
+    orders.created,
+    SUM(order_details.amount * order_details.price) AS total
+  FROM
+    orders
+  JOIN
+    order_details
+  ON
+    orders.order_id = order_details.order_id
+  GROUP BY
+    order_id
+  ORDER BY
+    created desc
+  ";
+
+  return fetch_all_query($db, $sql);
+}
+
+function get_detail($db, $order_id) {
+  $sql = "
+  SELECT
+    items.name,
+    order_details.price,
+    order_details.amount,
+    order_details.amount * order_details.price AS subtotal,
+    order_details.created
+  FROM
+    order_details
+  JOIN
+    items
+  ON
+    order_details.item_id = items.item_id
+  WHERE
+    order_id = :order_id
+  ";
+
+  return fetch_all_query($db, $sql, array(':order_id' => $order_id));
 }
