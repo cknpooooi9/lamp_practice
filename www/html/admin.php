@@ -18,6 +18,7 @@ if(is_admin($user) === false){
   redirect_to(LOGIN_URL);
 }
 
+//商品一覧を表示
 $items = get_all_items($db);
 
 //トークンの生成
