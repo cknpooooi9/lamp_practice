@@ -16,6 +16,15 @@
 
   <div class="container">
     <h1>商品一覧</h1>
+    <!-- プルダウンメニュー -->
+    <form>
+      <select name="change">
+        <option value="new" <?php if($change === 'new') { print(h('selected')); } ?>>新着順</option>
+        <option value="lowprice" <?php if($change === 'lowprice') { print(h('selected')); } ?>>価格の安い順</option>
+        <option value="highprice" <?php if($change === 'highprice') { print(h('selected')); } ?>>価格の高い順</option>
+      </select>
+      <input type="submit" value="並び替え">
+    </form>
     <?php include VIEW_PATH . 'templates/messages.php'; ?>
 
     <div class="card-deck">
