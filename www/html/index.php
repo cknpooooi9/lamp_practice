@@ -22,8 +22,20 @@ $db = get_db_connect();
 //ログインユーザーのデータ取得
 $user = get_login_user($db);
 
+//送信されたデータの取得
+$change = get_get('change', 'new');
+
 //商品一覧のデータを取得
-$items = get_open_items($db);
+if ($change === 'new') {
+  $items = get_open_items($db);
+} else if ($change === 'lowprice') {
+  //価格の安い順に商品を取得する関数(引数$db)
+  $items = get_lowprice_items($db);
+} else if ($change === 'highprice') {
+  //価格の高い順に商品を取得する関数(引数$db)
+  $items = get_highprice_items($db);
+} 
+
 
 //トークンの生成
 $token = get_csrf_token();

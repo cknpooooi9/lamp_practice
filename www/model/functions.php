@@ -10,11 +10,11 @@ function redirect_to($url){
   exit;
 }
 
-function get_get($name){
+function get_get($name, $status =''){
   if(isset($_GET[$name]) === true){
     return $_GET[$name];
   };
-  return '';
+  return $status;
 }
 
 function get_post($name){
